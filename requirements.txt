@@ -5,3 +5,4 @@ pytz==2020.1
 sqlparse
 drf_yasg
 djangorestframework-simplejwt
+djangorestframework-jwt

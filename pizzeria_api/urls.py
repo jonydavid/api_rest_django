@@ -14,8 +14,41 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include,re_path
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework_simplejwt import views as jwt_views
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+
+class Protegida(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        return Response({"content": "Esta vista está protegida"})
+        
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Pizzeria API",
+        default_version='v1',
+        description="Welcome to the Pizzeria API",
+        terms_of_service="https://www.example.com",
+        contact=openapi.Contact(email="jonydavid94@gmail.com"),
+        license=openapi.License(name="Awesome IP"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
+    re_path(r'^doc(?P<format>\.json|\.yaml)$',
+            schema_view.without_ui(cache_timeout=0), name='schema-json'), 
+    path('doc/', schema_view.with_ui('swagger', cache_timeout=0),
+         name='schema-swagger-ui'), 
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0),
+         name='schema-redoc'), 
     path('admin/', admin.site.urls),
+    path('',include('pizzeria_api.pizzas.urls')),
 ]
